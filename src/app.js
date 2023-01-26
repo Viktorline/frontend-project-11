@@ -1,5 +1,8 @@
 import * as yup from 'yup';
+import { setLocale } from 'yup';
+import i18next from 'i18next';
 import viewer from './view.js';
+import resources from './locales/index.js';
 
 export default () => {
   const state = {
@@ -11,6 +14,26 @@ export default () => {
     feeds: [],
     posts: [],
   };
+
+  const defaultLanguage = 'en';
+
+  const i18nextInstance = i18next.createInstance();
+  i18nextInstance.init({
+    lng: defaultLanguage,
+    debug: true,
+    resources: {
+      en: resources.en,
+    },
+  });
+
+  setLocale({
+    string: {
+      url: i18nextInstance.t('errors.notValid'),
+    },
+    mixed: {
+      notOneOf: i18nextInstance.t('errors.alreadyExists'),
+    },
+  });
 
   const form = document.querySelector('.rss-form');
   const input = document.querySelector('#url-input');
@@ -34,7 +57,7 @@ export default () => {
     const formData = new FormData(event.target);
     const inputValue = formData.get('url');
 
-    const schema = yup.string().required().url('notValid').notOneOf(watcher.feeds, 'alreadyExists');
+    const schema = yup.string().required().url().notOneOf(watcher.feeds);
 
     schema
       .validate(inputValue)
@@ -44,8 +67,8 @@ export default () => {
 
         watcher.form.validate = true;
       })
-      .catch((e) => {
-        const [error] = e.errors;
+      .catch((err) => {
+        const [error] = err.errors;
         watcher.form.errors = error;
 
         watcher.form.validate = false;
