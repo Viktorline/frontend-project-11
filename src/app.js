@@ -1,3 +1,4 @@
+import { Modal } from 'bootstrap';
 import * as yup from 'yup';
 import { setLocale } from 'yup';
 import i18next from 'i18next';
@@ -22,6 +23,8 @@ export default () => {
     },
     feeds: [],
     posts: [],
+    visitedPosts: [],
+    currentPostId: '',
   };
 
   const defaultLanguage = 'en';
@@ -49,6 +52,7 @@ export default () => {
   const feedback = document.querySelector('.feedback');
   const feedsContainer = document.querySelector('.feeds');
   const postsContainer = document.querySelector('.posts');
+  const modal = document.querySelector('#modal');
 
   const elements = {
     form,
@@ -56,6 +60,7 @@ export default () => {
     feedback,
     feedsContainer,
     postsContainer,
+    modal,
   };
 
   const watcher = viewer(state, elements);
@@ -114,6 +119,22 @@ export default () => {
 
     Promise.all(promises).finally(() => setTimeout(() => updater(watcher), 5000));
   };
+
+  elements.postsContainer.addEventListener('click', (event) => {
+    if (event.target.dataset.id) {
+      const currentPost = watcher.posts.find((post) => post.postId === event.target.dataset.id);
+      currentPost.visited = true;
+      watcher.visitedPosts.push(currentPost);
+      watcher.currentPostId = event.target.dataset.id;
+    } else if (event.target.classList.contains('list-group-item')) {
+      const currentPost = watcher.posts.find(
+        (post) => post.postId === event.target.firstChild.dataset.id,
+      );
+      currentPost.visited = true;
+      watcher.visitedPosts.push(currentPost);
+      window.open(event.target.firstChild.href);
+    }
+  });
 
   updater();
 };

@@ -117,9 +117,14 @@ const renderPosts = (elements, posts) => {
     );
 
     const link = document.createElement('a');
-    link.classList.add('fw-bold');
-    link.setAttribute('href', post.link);
-    link.setAttribute('data-id', post.id);
+    if (post.visited !== true) {
+      link.classList.add('fw-bold');
+    } else {
+      link.classList.add('fw-normal', 'link-secondary');
+    }
+
+    link.setAttribute('href', post.postLink);
+    link.setAttribute('data-id', post.postId);
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
     link.textContent = post.postTitle;
@@ -127,7 +132,7 @@ const renderPosts = (elements, posts) => {
     const button = document.createElement('button');
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     button.setAttribute('type', 'button');
-    button.setAttribute('data-id', post.id);
+    button.setAttribute('data-id', post.postId);
     button.setAttribute('data-bs-toggle', 'modal');
     button.setAttribute('data-bs-target', '#modal');
     button.textContent = i18nextInstance.t('containerContent.buttonWatch');
@@ -138,6 +143,34 @@ const renderPosts = (elements, posts) => {
 
   card.append(cardTitle, listGroup);
   elements.postsContainer.append(card);
+};
+
+/// //////////////////////////
+// Рендер посещенных постов
+/// //////////////////////////
+
+const renderVisitedPosts = (posts) => {
+  posts.forEach((post) => {
+    const link = document.querySelector(`a[data-id="${post.postId}"]`);
+    link.classList.remove('fw-bold');
+    link.classList.add('fw-normal', 'link-secondary');
+  });
+};
+
+/// //////////////////////////
+// Рендер окон
+/// //////////////////////////
+
+const renderModal = (state, elements, currentPostId) => {
+  const currentPost = state.posts.find((post) => post.postId === currentPostId);
+
+  const modalTitle = elements.modal.querySelector('.modal-title');
+  const modalBody = elements.modal.querySelector('.modal-body');
+  const modalLink = elements.modal.querySelector('.full-article');
+  console.log(currentPost);
+  modalTitle.textContent = currentPost.postTitle;
+  modalBody.textContent = currentPost.postDescription;
+  modalLink.setAttribute('href', currentPost.postLink);
 };
 
 /// //////////////////////////
@@ -155,5 +188,12 @@ export default (state, elements) => onChange(state, (path, value) => {
 
   if (path === 'posts') {
     renderPosts(elements, value);
+  }
+
+  if (path === 'visitedPosts') {
+    renderVisitedPosts(value);
+  }
+  if (path === 'currentPostId') {
+    renderModal(state, elements, value);
   }
 });

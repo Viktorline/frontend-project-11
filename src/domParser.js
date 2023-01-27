@@ -25,6 +25,7 @@ export default (response, responseLink = null) => {
       postDescription,
       postLink,
       postId,
+      visited: false,
     });
   });
   return { feed: { title, responseLink, description }, posts };
