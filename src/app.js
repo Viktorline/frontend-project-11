@@ -88,7 +88,7 @@ export default () => {
         watcher.form.errors = [];
         watcher.form.validate = true;
         const content = domParser(response.data.contents, inputValue);
-        watcher.feeds.push(content.feed);
+        watcher.feeds.unshift(content.feed);
         watcher.posts = [...content.posts, ...watcher.posts];
       })
       .catch((err) => {
@@ -97,4 +97,23 @@ export default () => {
         watcher.form.validate = false;
       });
   });
+
+  const updater = () => {
+    const promises = watcher.feeds.map((feed) => {
+      const promise = axios.get(hexletProxy(feed.responseLink));
+
+      return promise.then((response) => {
+        const content = domParser(response.data.contents);
+        const { posts } = content;
+        const currentPosts = watcher.posts.map((post) => post.postLink);
+        const newPosts = posts.filter((post) => !currentPosts.includes(post.postLink));
+
+        watcher.posts = newPosts.concat(watcher.posts);
+      });
+    });
+
+    Promise.all(promises).finally(() => setTimeout(() => updater(watcher), 5000));
+  };
+
+  updater();
 };

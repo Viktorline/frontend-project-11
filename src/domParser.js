@@ -1,6 +1,6 @@
 import { uniqueId } from 'lodash';
 
-export default (response, responseLink) => {
+export default (response, responseLink = null) => {
   const parser = new DOMParser();
   const content = parser.parseFromString(response, 'application/xml');
 
@@ -19,9 +19,12 @@ export default (response, responseLink) => {
     const postTitle = post.querySelector('title').textContent;
     const postDescription = post.querySelector('description').textContent;
     const postLink = post.querySelector('link').textContent;
-    const postId = uniqueId(title);
+    const postId = uniqueId();
     posts.push({
-      postTitle, postDescription, postLink, postId,
+      postTitle,
+      postDescription,
+      postLink,
+      postId,
     });
   });
   return { feed: { title, responseLink, description }, posts };
