@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Viktorline/frontend-project-11#readme",
   "dependencies": {
     "@popperjs/core": "^2.11.6",
+    "axios": "^1.2.5",
     "bootstrap": "^5.2.3",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.27.5",
@@ -33,6 +34,7 @@
     "eslint": "^8.32.0",
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.0",
+    "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.7.2",
     "on-change": "^4.0.2",
     "postcss-loader": "^7.0.2",
