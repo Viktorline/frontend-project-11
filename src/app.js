@@ -83,9 +83,6 @@ export default () => {
         const response = axios.get(hexletProxy(inputValue));
         return response;
       })
-      // .catch((err) => {
-      //
-      // })
       .then((response) => {
         watcher.form.errors = [];
         watcher.form.validate = true;
@@ -94,8 +91,6 @@ export default () => {
         watcher.posts = [...content.posts, ...watcher.posts];
       })
       .catch((err) => {
-        console.log(err.message);
-        // const [error] = err.errors;
         if (err.name === 'AxiosError') {
           watcher.form.errors = err.name;
         } else if (err.message === 'alreadyExists') {
@@ -103,10 +98,10 @@ export default () => {
         } else if (err.message === 'notValid') {
           watcher.form.errors = err.message;
         } else {
-          watcher.form.errors = 'unknown';
+          const [error] = err.errors;
+          watcher.form.errors = error;
         }
         watcher.form.validate = false;
-        console.log(1);
       });
   });
 
