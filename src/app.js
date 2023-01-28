@@ -8,7 +8,7 @@ import viewer from './view.js';
 import resources from './locales/index.js';
 
 const hexletProxy = (link) => {
-  const url = new URL('https://rigins.hexlet.app/get');
+  const url = new URL('https://allorigins.hexlet.app/get');
   url.searchParams.set('disableCache', 'true');
   url.searchParams.set('url', link);
   return url;
@@ -132,7 +132,7 @@ export default () => {
       watcher.currentPostId = event.target.dataset.id;
     } else if (event.target.classList.contains('list-group-item')) {
       const currentPost = watcher.posts.find(
-        (post) => post.postId === event.target.firstChild.dataset.id,
+        (post) => post.postId === event.target.firstChild.dataset.id
       );
       currentPost.visited = true;
       watcher.visitedPosts.push(currentPost);
