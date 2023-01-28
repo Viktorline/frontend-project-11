@@ -8,7 +8,7 @@ import viewer from './view.js';
 import resources from './locales/index.js';
 
 const hexletProxy = (link) => {
-  const url = new URL('https://allorigins.hexlet.app/get');
+  const url = new URL('https://rigins.hexlet.app/get');
   url.searchParams.set('disableCache', 'true');
   url.searchParams.set('url', link);
   return url;
@@ -80,14 +80,8 @@ export default () => {
     schema
       .validate(inputValue)
       .then(async () => {
-        try {
-          const response = await axios.get(hexletProxy(inputValue));
-          return response;
-        } catch (err) {
-          const [error] = err.errors;
-          watcher.form.errors = error;
-          return false;
-        }
+        const response = await axios.get(hexletProxy(inputValue));
+        return response;
       })
       .then((response) => {
         watcher.form.errors = [];
@@ -97,9 +91,19 @@ export default () => {
         watcher.posts = [...content.posts, ...watcher.posts];
       })
       .catch((err) => {
-        const [error] = err.errors;
-        watcher.form.errors = error;
-        watcher.form.validate = false;
+        console.log(err.name);
+
+        if (err.name === 'AxiosError') {
+          watcher.form.errors = err.name;
+        } else if (err.isParsingError) {
+          const [error] = err.errors;
+          watcher.form.errors = error;
+          watcher.form.validate = false;
+        } else if (err.name === 'ValidationError') {
+          watcher.form.errors = err.message;
+        } else {
+          watcher.form.errors = 'unknown';
+        }
       });
   });
 
@@ -128,7 +132,7 @@ export default () => {
       watcher.currentPostId = event.target.dataset.id;
     } else if (event.target.classList.contains('list-group-item')) {
       const currentPost = watcher.posts.find(
-        (post) => post.postId === event.target.firstChild.dataset.id,
+        (post) => post.postId === event.target.firstChild.dataset.id
       );
       currentPost.visited = true;
       watcher.visitedPosts.push(currentPost);
