@@ -91,16 +91,14 @@ export default () => {
         watcher.posts = [...content.posts, ...watcher.posts];
       })
       .catch((err) => {
-        console.log(err.name);
-
+        const [error] = err.errors;
         if (err.name === 'AxiosError') {
           watcher.form.errors = err.name;
         } else if (err.isParsingError) {
-          const [error] = err.errors;
           watcher.form.errors = error;
           watcher.form.validate = false;
-        } else if (err.name === 'ValidationError') {
-          watcher.form.errors = err.message;
+        } else if (error === 'parserError') {
+          watcher.form.errors = error;
         } else {
           watcher.form.errors = 'unknown';
         }
