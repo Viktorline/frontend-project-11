@@ -9,6 +9,7 @@ export default {
       alreadyExists: 'RSS уже существует',
       parserError: 'Ресурс не содержит валидный RSS',
       network: 'Ошибка сети',
+      unknown: 'Что-то пошло не так... Попробуйте еще раз',
     },
     containerContent: {
       feeds: 'Фиды',

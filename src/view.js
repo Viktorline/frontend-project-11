@@ -40,6 +40,10 @@ const renderErrors = (elements, value) => {
   if (value === 'AxiosError') {
     elements.feedback.textContent = i18nextInstance.t('errors.network');
   }
+  if (value === 'unknown') {
+    elements.feedback.textContent = i18nextInstance.t('errors.unknown');
+  }
+
   elements.form.reset();
   elements.input.focus();
 };
