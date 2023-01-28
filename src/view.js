@@ -116,7 +116,7 @@ const renderPosts = (elements, posts) => {
       'justify-content-between',
       'align-items-start',
       'border-0',
-      'border-end-0'
+      'border-end-0',
     );
 
     const link = document.createElement('a');
@@ -180,24 +180,23 @@ const renderModal = (state, elements, currentPostId) => {
 // Сам watcher
 /// //////////////////////////
 
-export default (state, elements) =>
-  onChange(state, (path, value) => {
-    if (path === 'form.errors') {
-      renderErrors(elements, value);
-    }
+export default (state, elements) => onChange(state, (path, value) => {
+  if (path === 'form.errors') {
+    renderErrors(elements, value);
+  }
 
-    if (path === 'feeds') {
-      renderFeeds(elements, value);
-    }
+  if (path === 'feeds') {
+    renderFeeds(elements, value);
+  }
 
-    if (path === 'posts') {
-      renderPosts(elements, value);
-    }
+  if (path === 'posts') {
+    renderPosts(elements, value);
+  }
 
-    if (path === 'visitedPosts') {
-      renderVisitedPosts(value);
-    }
-    if (path === 'currentPostId') {
-      renderModal(state, elements, value);
-    }
-  });
+  if (path === 'visitedPosts') {
+    renderVisitedPosts(value);
+  }
+  if (path === 'currentPostId') {
+    renderModal(state, elements, value);
+  }
+});
