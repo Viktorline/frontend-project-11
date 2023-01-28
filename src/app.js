@@ -92,6 +92,7 @@ export default () => {
       })
       .catch((err) => {
         const [error] = err.errors;
+        console.log(error);
         if (err.name === 'AxiosError') {
           watcher.form.errors = err.name;
         } else if (error === 'alreadyExists') {
@@ -100,7 +101,7 @@ export default () => {
         } else if (error === 'parserError') {
           watcher.form.errors = error;
         } else {
-          watcher.form.errors = 'unknown';
+          watcher.form.errors = 'notValid';
         }
       });
   });
