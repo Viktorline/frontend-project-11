@@ -94,7 +94,7 @@ export default () => {
         const [error] = err.errors;
         if (err.name === 'AxiosError') {
           watcher.form.errors = err.name;
-        } else if (err.isParsingError) {
+        } else if (error === 'alreadyExists') {
           watcher.form.errors = error;
           watcher.form.validate = false;
         } else if (error === 'parserError') {
@@ -130,7 +130,7 @@ export default () => {
       watcher.currentPostId = event.target.dataset.id;
     } else if (event.target.classList.contains('list-group-item')) {
       const currentPost = watcher.posts.find(
-        (post) => post.postId === event.target.firstChild.dataset.id,
+        (post) => post.postId === event.target.firstChild.dataset.id
       );
       currentPost.visited = true;
       watcher.visitedPosts.push(currentPost);
