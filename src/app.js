@@ -1,4 +1,4 @@
-import { Modal } from 'bootstrap';
+import 'bootstrap';
 import * as yup from 'yup';
 import { setLocale } from 'yup';
 import i18next from 'i18next';

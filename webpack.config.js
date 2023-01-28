@@ -48,7 +48,7 @@ export default {
             loader: 'postcss-loader',
             options: {
               postcssOptions: {
-                plugins: () => [require('autoprefixer')],
+                plugins: () => [import('autoprefixer')],
               },
             },
           },
