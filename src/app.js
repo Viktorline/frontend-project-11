@@ -3,7 +3,7 @@ import * as yup from 'yup';
 import { setLocale } from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
-import { uniqueId, cloneDeep } from 'lodash';
+import { uniqueId } from 'lodash';
 import domParser from './domParser.js';
 import viewer from './view.js';
 import resources from './locales/index.js';

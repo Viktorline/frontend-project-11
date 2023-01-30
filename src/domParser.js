@@ -1,5 +1,3 @@
-import { uniqueId } from 'lodash';
-
 export default (response, responseLink = null) => {
   const parser = new DOMParser();
   const content = parser.parseFromString(response, 'application/xml');
