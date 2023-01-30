@@ -4,10 +4,6 @@ import onChange from 'on-change';
 import i18next from 'i18next';
 import resources from './locales/index.js';
 
-/// //////////////////////////
-// Текст
-/// //////////////////////////
-
 const defaultLanguage = 'ru';
 
 const i18nextInstance = i18next.createInstance();
@@ -20,9 +16,6 @@ i18nextInstance.init({
   },
 });
 
-/// //////////////////////////
-// Рендер ошибок
-/// //////////////////////////
 const renderErrors = (elements, value) => {
   elements.feedback.classList.remove('text-success');
   elements.feedback.classList.add('text-danger');
@@ -47,9 +40,6 @@ const renderErrors = (elements, value) => {
   elements.form.reset();
   elements.input.focus();
 };
-/// //////////////////////////
-// Рендер фидов
-/// //////////////////////////
 
 const renderFeeds = (elements, feeds) => {
   elements.feedsContainer.innerHTML = '';
@@ -94,10 +84,6 @@ const renderFeeds = (elements, feeds) => {
 
   elements.feedsContainer.append(card);
 };
-
-/// //////////////////////////
-// Рендер постов
-/// //////////////////////////
 
 const renderPosts = (elements, posts) => {
   elements.postsContainer.innerHTML = '';
@@ -152,10 +138,6 @@ const renderPosts = (elements, posts) => {
   elements.postsContainer.append(card);
 };
 
-/// //////////////////////////
-// Рендер посещенных постов
-/// //////////////////////////
-
 const renderVisitedPosts = (posts) => {
   posts.forEach((post) => {
     const link = document.querySelector(`a[data-id="${post.postId}"]`);
@@ -164,43 +146,39 @@ const renderVisitedPosts = (posts) => {
   });
 };
 
-/// //////////////////////////
-// Рендер окон
-/// //////////////////////////
-
 const renderModal = (state, elements, currentPostId) => {
   const currentPost = state.posts.find((post) => post.postId === currentPostId);
 
   const modalTitle = elements.modal.querySelector('.modal-title');
   const modalBody = elements.modal.querySelector('.modal-body');
   const modalLink = elements.modal.querySelector('.full-article');
-  console.log(currentPost);
   modalTitle.textContent = currentPost.postTitle;
   modalBody.textContent = currentPost.postDescription;
   modalLink.setAttribute('href', currentPost.postLink);
 };
 
-/// //////////////////////////
-// Сам watcher
-/// //////////////////////////
+const buttonBlock = (value) => {
+  const button = document.querySelector('button[type="submit"]');
+  button.disabled = value === true;
+};
 
 export default (state, elements) => onChange(state, (path, value) => {
   if (path === 'form.errors') {
     renderErrors(elements, value);
   }
-
   if (path === 'feeds') {
     renderFeeds(elements, value);
   }
-
   if (path === 'posts') {
     renderPosts(elements, value);
   }
-
   if (path === 'visitedPosts') {
     renderVisitedPosts(value);
   }
   if (path === 'currentPostId') {
     renderModal(state, elements, value);
+  }
+  if (path === 'form.responseWaiting') {
+    buttonBlock(value);
   }
 });

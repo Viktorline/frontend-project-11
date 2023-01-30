@@ -1,7 +1,7 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
-  "description": "[![Actions Status](https://github.com/Viktorline/frontend-project-11/workflows/hexlet-check/badge.svg)](https://github.com/Viktorline/frontend-project-11/actions)",
+  "description": "RSS reader for favorite websites updated every 5 seconds",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -23,11 +23,8 @@
     "@popperjs/core": "^2.11.6",
     "axios": "^1.2.5",
     "bootstrap": "^5.2.3",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.27.5",
     "i18next": "^22.4.9",
     "lodash": "^4.17.21",
-    "npm": "^9.3.1",
     "on-change": "^4.0.2",
     "yup": "^0.32.11"
   },
@@ -35,6 +32,8 @@
     "autoprefixer": "^10.4.13",
     "css-loader": "^6.7.3",
     "eslint": "^8.32.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.2",

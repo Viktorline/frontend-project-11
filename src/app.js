@@ -3,6 +3,7 @@ import * as yup from 'yup';
 import { setLocale } from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
+import { uniqueId, cloneDeep } from 'lodash';
 import domParser from './domParser.js';
 import viewer from './view.js';
 import resources from './locales/index.js';
@@ -14,12 +15,21 @@ const hexletProxy = (link) => {
   return url;
 };
 
+const generateId = (content) => {
+  const { feed, posts } = content;
+  return {
+    feed,
+    posts: posts.map((post) => ({ ...post, postId: uniqueId() })),
+  };
+};
+
 export default () => {
   const state = {
     form: {
-      validate: true,
+      valid: true,
       errors: [],
       message: '',
+      responseWaiting: false,
     },
     feeds: [],
     posts: [],
@@ -67,6 +77,7 @@ export default () => {
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
+    watcher.form.responseWaiting = true;
 
     const formData = new FormData(event.target);
     const inputValue = formData.get('url');
@@ -85,12 +96,15 @@ export default () => {
       })
       .then((response) => {
         watcher.form.errors = [];
-        watcher.form.validate = true;
+        watcher.form.valid = true;
+        watcher.form.responseWaiting = false;
         const content = domParser(response.data.contents, inputValue);
-        watcher.feeds.unshift(content.feed);
-        watcher.posts = [...content.posts, ...watcher.posts];
+        const readyContent = generateId(content);
+        watcher.feeds.unshift(readyContent.feed);
+        watcher.posts = [...readyContent.posts, ...watcher.posts];
       })
       .catch((err) => {
+        watcher.form.responseWaiting = false;
         if (err.name === 'AxiosError') {
           watcher.form.errors = err.name;
         } else if (err.message === 'alreadyExists') {
@@ -101,11 +115,12 @@ export default () => {
           const [error] = err.errors;
           watcher.form.errors = error;
         }
-        watcher.form.validate = false;
+        watcher.form.valid = false;
+        watcher.form.responseWaiting = false;
       });
   });
 
-  const updater = () => {
+  const update = () => {
     const promises = watcher.feeds.map((feed) => {
       const promise = axios.get(hexletProxy(feed.responseLink));
 
@@ -119,24 +134,22 @@ export default () => {
       });
     });
 
-    Promise.all(promises).finally(() => setTimeout(() => updater(watcher), 5000));
+    Promise.all(promises).finally(() => setTimeout(() => update(watcher), 5000));
   };
 
   elements.postsContainer.addEventListener('click', (event) => {
-    if (event.target.dataset.id) {
-      const currentPost = watcher.posts.find((post) => post.postId === event.target.dataset.id);
+    const isList = event.target.classList.contains('list-group-item');
+    const target = event.target.dataset.id ? event.target : isList && event.target.firstChild;
+
+    if (target && target.dataset.id) {
+      const currentPost = watcher.posts.find((post) => post.postId === target.dataset.id);
       currentPost.visited = true;
       watcher.visitedPosts.push(currentPost);
-      watcher.currentPostId = event.target.dataset.id;
-    } else if (event.target.classList.contains('list-group-item')) {
-      const currentPost = watcher.posts.find(
-        (post) => post.postId === event.target.firstChild.dataset.id,
-      );
-      currentPost.visited = true;
-      watcher.visitedPosts.push(currentPost);
-      window.open(event.target.firstChild.href);
+      watcher.currentPostId = target.dataset.id;
     }
+
+    if (isList) event.target.firstChild.click();
   });
 
-  updater();
+  update();
 };
