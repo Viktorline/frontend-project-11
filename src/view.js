@@ -85,7 +85,7 @@ const renderFeeds = (elements, feeds) => {
   elements.feedsContainer.append(card);
 };
 
-const renderPosts = (elements, posts) => {
+const renderPosts = (state, elements, posts) => {
   elements.postsContainer.innerHTML = '';
 
   const card = document.createElement('div');
@@ -110,12 +110,12 @@ const renderPosts = (elements, posts) => {
     );
 
     const link = document.createElement('a');
-    if (post.visited !== true) {
-      link.classList.add('fw-bold');
-    } else {
-      link.classList.add('fw-normal', 'link-secondary');
-    }
 
+    if (state.visitedPostsId.includes(post.postId)) {
+      link.classList.add('fw-normal', 'link-secondary');
+    } else {
+      link.classList.add('fw-bold');
+    }
     link.setAttribute('href', post.postLink);
     link.setAttribute('data-id', post.postId);
     link.setAttribute('target', '_blank');
@@ -138,16 +138,16 @@ const renderPosts = (elements, posts) => {
   elements.postsContainer.append(card);
 };
 
-const renderVisitedPosts = (posts) => {
-  posts.forEach((post) => {
-    const link = document.querySelector(`a[data-id="${post.postId}"]`);
+const renderVisitedPosts = (postsIds) => {
+  postsIds.forEach((postId) => {
+    const link = document.querySelector(`a[data-id="${postId}"]`);
     link.classList.remove('fw-bold');
     link.classList.add('fw-normal', 'link-secondary');
   });
 };
 
-const renderModal = (state, elements, currentPostId) => {
-  const currentPost = state.posts.find((post) => post.postId === currentPostId);
+const renderModal = (state, elements) => {
+  const currentPost = state.posts.find((post) => post.postId === state.currentPostId);
 
   const modalTitle = elements.modal.querySelector('.modal-title');
   const modalBody = elements.modal.querySelector('.modal-body');
@@ -157,28 +157,37 @@ const renderModal = (state, elements, currentPostId) => {
   modalLink.setAttribute('href', currentPost.postLink);
 };
 
-const buttonBlock = (value) => {
+const buttonBlock = (value = null) => {
   const button = document.querySelector('button[type="submit"]');
-  button.disabled = value === true;
+  button.disabled = !!value;
 };
 
 export default (state, elements) => onChange(state, (path, value) => {
-  if (path === 'form.errors') {
-    renderErrors(elements, value);
+  if (path === 'form.status') {
+    switch (value) {
+      case 'sendingRequest':
+        buttonBlock(value);
+        break;
+      case 'responseRecieved':
+        buttonBlock();
+        break;
+      case 'failed':
+        renderErrors(elements, state.form.errors);
+        break;
+      default:
+        break;
+    }
   }
   if (path === 'feeds') {
     renderFeeds(elements, value);
   }
   if (path === 'posts') {
-    renderPosts(elements, value);
+    renderPosts(state, elements, value);
   }
-  if (path === 'visitedPosts') {
+  if (path === 'visitedPostsId') {
     renderVisitedPosts(value);
   }
   if (path === 'currentPostId') {
-    renderModal(state, elements, value);
-  }
-  if (path === 'form.responseWaiting') {
-    buttonBlock(value);
+    renderModal(state, elements);
   }
 });

@@ -29,12 +29,13 @@ export default () => {
       valid: true,
       errors: [],
       message: '',
-      responseWaiting: false,
+      status: '',
     },
     feeds: [],
     posts: [],
-    visitedPosts: [],
-    currentPostId: '',
+
+    visitedPostsId: [],
+    currentPostId: null,
   };
 
   const defaultLanguage = 'en';
@@ -77,7 +78,7 @@ export default () => {
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    watcher.form.responseWaiting = true;
+    watcher.form.status = 'sendingRequest';
 
     const formData = new FormData(event.target);
     const inputValue = formData.get('url');
@@ -97,14 +98,13 @@ export default () => {
       .then((response) => {
         watcher.form.errors = [];
         watcher.form.valid = true;
-        watcher.form.responseWaiting = false;
+        watcher.form.status = 'responseRecieved';
         const content = domParser(response.data.contents, inputValue);
         const readyContent = generateId(content);
         watcher.feeds.unshift(readyContent.feed);
         watcher.posts = [...readyContent.posts, ...watcher.posts];
       })
       .catch((err) => {
-        watcher.form.responseWaiting = false;
         if (err.name === 'AxiosError') {
           watcher.form.errors = err.name;
         } else if (err.message === 'alreadyExists') {
@@ -115,8 +115,8 @@ export default () => {
           const [error] = err.errors;
           watcher.form.errors = error;
         }
+        watcher.form.status = 'failed';
         watcher.form.valid = false;
-        watcher.form.responseWaiting = false;
       });
   });
 
@@ -143,9 +143,8 @@ export default () => {
 
     if (target && target.dataset.id) {
       const currentPost = watcher.posts.find((post) => post.postId === target.dataset.id);
-      currentPost.visited = true;
-      watcher.visitedPosts.push(currentPost);
-      watcher.currentPostId = target.dataset.id;
+      watcher.visitedPostsId.push(currentPost.postId);
+      watcher.currentPostId = currentPost.postId;
     }
 
     if (isList) event.target.firstChild.click();
