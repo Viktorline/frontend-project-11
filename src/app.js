@@ -12,7 +12,7 @@ const hexletProxy = (link) => {
   const url = new URL('https://allorigins.hexlet.app/get');
   url.searchParams.set('disableCache', 'true');
   url.searchParams.set('url', link);
-  return url;
+  return url.toString();
 };
 
 const generateId = (content) => {
@@ -38,23 +38,21 @@ export default () => {
     currentPostId: null,
   };
 
-  const defaultLanguage = 'en';
-
   const i18nextInstance = i18next.createInstance();
   i18nextInstance.init({
-    lng: defaultLanguage,
+    lng: 'ru',
     debug: false,
     resources: {
-      en: resources.en,
+      ru: resources.ru,
     },
   });
 
   setLocale({
     string: {
-      url: i18nextInstance.t('errors.notValid'),
+      url: 'notValid',
     },
     mixed: {
-      notOneOf: i18nextInstance.t('errors.alreadyExists'),
+      notOneOf: 'alreadyExists',
     },
   });
 
@@ -74,11 +72,11 @@ export default () => {
     modal,
   };
 
-  const watcher = viewer(state, elements);
+  const watchedState = viewer(state, elements, i18nextInstance);
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    watcher.form.status = 'sendingRequest';
+    watchedState.form.status = 'sendingRequest';
 
     const formData = new FormData(event.target);
     const inputValue = formData.get('url');
@@ -87,67 +85,72 @@ export default () => {
       .string()
       .required()
       .url()
-      .notOneOf(watcher.feeds.map((feed) => feed.responseLink));
+      .notOneOf(watchedState.feeds.map((feed) => feed.responseLink));
 
     schema
       .validate(inputValue)
       .then(() => {
-        const response = axios.get(hexletProxy(inputValue));
+        const queryString = hexletProxy(inputValue);
+        const response = axios.get(queryString);
         return response;
       })
       .then((response) => {
-        watcher.form.errors = [];
-        watcher.form.valid = true;
-        watcher.form.status = 'responseRecieved';
+        watchedState.form.errors = [];
+        watchedState.form.valid = true;
+        watchedState.form.status = 'responseRecieved';
         const content = domParser(response.data.contents, inputValue);
         const readyContent = generateId(content);
-        watcher.feeds.unshift(readyContent.feed);
-        watcher.posts = [...readyContent.posts, ...watcher.posts];
+        watchedState.feeds.unshift(readyContent.feed);
+        watchedState.posts = [...readyContent.posts, ...watchedState.posts];
       })
       .catch((err) => {
         if (err.name === 'AxiosError') {
-          watcher.form.errors = err.name;
+          watchedState.form.errors = err.name;
         } else if (err.message === 'alreadyExists') {
-          watcher.form.errors = err.message;
+          watchedState.form.errors = err.message;
         } else if (err.message === 'notValid') {
-          watcher.form.errors = err.message;
+          watchedState.form.errors = err.message;
         } else {
           const [error] = err.errors;
-          watcher.form.errors = error;
+          watchedState.form.errors = error;
         }
-        watcher.form.status = 'failed';
-        watcher.form.valid = false;
+        watchedState.form.status = 'failed';
+        watchedState.form.valid = false;
       });
   });
 
   const update = () => {
-    const promises = watcher.feeds.map((feed) => {
+    const millSecToUpdate = 5000;
+    const promises = watchedState.feeds.map((feed) => {
       const promise = axios.get(hexletProxy(feed.responseLink));
 
-      return promise.then((response) => {
-        const content = domParser(response.data.contents);
-        const { posts } = content;
-        const currentPosts = watcher.posts.map((post) => post.postLink);
-        const newPosts = posts.filter((post) => !currentPosts.includes(post.postLink));
+      return promise
+        .then((response) => {
+          const content = domParser(response.data.contents);
+          const { posts } = content;
+          const currentPosts = watchedState.posts.map((post) => post.postLink);
+          const newPosts = posts.filter((post) => !currentPosts.includes(post.postLink));
 
-        watcher.posts = newPosts.concat(watcher.posts);
-      });
+          watchedState.posts = newPosts.concat(watchedState.posts);
+        })
+        .catch((err) => {
+          const [error] = err.errors;
+          watchedState.form.errors = error;
+          watchedState.form.status = 'failed';
+        });
     });
 
-    Promise.all(promises).finally(() => setTimeout(() => update(watcher), 5000));
+    Promise.all(promises).finally(() => setTimeout(() => update(), millSecToUpdate));
   };
 
   elements.postsContainer.addEventListener('click', (event) => {
-    const isList = event.target.classList.contains('list-group-item');
-    const target = event.target.dataset.id ? event.target : isList && event.target.firstChild;
-
-    if (target && target.dataset.id) {
-      const currentPost = watcher.posts.find((post) => post.postId === target.dataset.id);
-      watcher.visitedPostsId.push(currentPost.postId);
-      watcher.currentPostId = currentPost.postId;
+    if (event.target.dataset.id) {
+      const currentPost = watchedState.posts.find(
+        (post) => post.postId === event.target.dataset.id,
+      );
+      watchedState.visitedPostsId.push(currentPost.postId);
+      watchedState.currentPostId = currentPost.postId;
     }
-
-    if (isList) event.target.firstChild.click();
   });
 
   update();

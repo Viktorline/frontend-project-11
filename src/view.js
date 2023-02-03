@@ -1,47 +1,39 @@
 /* eslint-disable no-param-reassign */
 
 import onChange from 'on-change';
-import i18next from 'i18next';
-import resources from './locales/index.js';
+// import i18next from 'i18next';
+// import resources from './locales/index.js';
 
-const defaultLanguage = 'ru';
-
-const i18nextInstance = i18next.createInstance();
-i18nextInstance.init({
-  lng: defaultLanguage,
-  debug: false,
-  resources: {
-    en: resources.en,
-    ru: resources.ru,
-  },
-});
-
-const renderErrors = (elements, value) => {
+const renderErrors = (elements, value, i18nextInstance) => {
   elements.feedback.classList.remove('text-success');
   elements.feedback.classList.add('text-danger');
-
   elements.input.classList.add('is-invalid');
-  if (value === 'notValid') {
-    elements.feedback.textContent = i18nextInstance.t('errors.notValid');
-  }
-  if (value === 'alreadyExists') {
-    elements.feedback.textContent = i18nextInstance.t('errors.alreadyExists');
-  }
-  if (value === 'parserError') {
-    elements.feedback.textContent = i18nextInstance.t('errors.parserError');
-  }
-  if (value === 'AxiosError') {
-    elements.feedback.textContent = i18nextInstance.t('errors.network');
-  }
-  if (value === 'unknown') {
-    elements.feedback.textContent = i18nextInstance.t('errors.unknown');
+
+  switch (value) {
+    case 'notValid':
+      elements.feedback.textContent = i18nextInstance.t('errors.notValid');
+      break;
+    case 'alreadyExists':
+      elements.feedback.textContent = i18nextInstance.t('errors.alreadyExists');
+      break;
+    case 'parserError':
+      elements.feedback.textContent = i18nextInstance.t('errors.parserError');
+      break;
+    case 'AxiosError':
+      elements.feedback.textContent = i18nextInstance.t('errors.network');
+      break;
+    case 'unknown':
+      elements.feedback.textContent = i18nextInstance.t('errors.unknown');
+      break;
+    default:
+      break;
   }
 
   elements.form.reset();
   elements.input.focus();
 };
 
-const renderFeeds = (elements, feeds) => {
+const renderFeeds = (elements, feeds, i18nextInstance) => {
   elements.feedsContainer.innerHTML = '';
   elements.feedback.classList.remove('text-danger');
   elements.feedback.classList.add('text-success');
@@ -85,7 +77,7 @@ const renderFeeds = (elements, feeds) => {
   elements.feedsContainer.append(card);
 };
 
-const renderPosts = (state, elements, posts) => {
+const renderPosts = (state, elements, i18nextInstance) => {
   elements.postsContainer.innerHTML = '';
 
   const card = document.createElement('div');
@@ -98,7 +90,7 @@ const renderPosts = (state, elements, posts) => {
   const listGroup = document.createElement('ul');
   listGroup.classList.add('list-group', 'border-0', 'rounded-0');
 
-  posts.forEach((post) => {
+  state.posts.forEach((post) => {
     const listItem = document.createElement('li');
     listItem.classList.add(
       'list-group-item',
@@ -162,32 +154,41 @@ const buttonBlock = (value = null) => {
   button.disabled = !!value;
 };
 
-export default (state, elements) => onChange(state, (path, value) => {
-  if (path === 'form.status') {
-    switch (value) {
-      case 'sendingRequest':
-        buttonBlock(value);
-        break;
-      case 'responseRecieved':
-        buttonBlock();
-        break;
-      case 'failed':
-        renderErrors(elements, state.form.errors);
-        break;
-      default:
-        break;
-    }
+const updateFormStatus = (elements, state, i18nextInstance, value) => {
+  switch (value) {
+    case 'sendingRequest':
+      buttonBlock(value);
+      break;
+    case 'responseRecieved':
+      buttonBlock();
+      break;
+    case 'failed':
+      renderErrors(elements, state.form.errors, i18nextInstance);
+      buttonBlock();
+      break;
+    default:
+      break;
   }
-  if (path === 'feeds') {
-    renderFeeds(elements, value);
-  }
-  if (path === 'posts') {
-    renderPosts(state, elements, value);
-  }
-  if (path === 'visitedPostsId') {
-    renderVisitedPosts(value);
-  }
-  if (path === 'currentPostId') {
-    renderModal(state, elements);
+};
+
+export default (state, elements, i18nextInstance) => onChange(state, (path, value) => {
+  switch (path) {
+    case 'form.status':
+      updateFormStatus(elements, state, i18nextInstance, value);
+      break;
+    case 'feeds':
+      renderFeeds(elements, value, i18nextInstance);
+      break;
+    case 'posts':
+      renderPosts(state, elements, i18nextInstance);
+      break;
+    case 'visitedPostsId':
+      renderVisitedPosts(value);
+      break;
+    case 'currentPostId':
+      renderModal(state, elements);
+      break;
+    default:
+      break;
   }
 });

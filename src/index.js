@@ -1,4 +1,4 @@
 import './scss/styles.scss';
-import app from './app.js';
+import runApp from './app.js';
 
-app();
+runApp();
