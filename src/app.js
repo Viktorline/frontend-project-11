@@ -120,7 +120,7 @@ export default () => {
   });
 
   const update = () => {
-    const millSecToUpdate = 5000;
+    const updateInterval = 5000;
     const promises = watchedState.feeds.map((feed) => {
       const promise = axios.get(hexletProxy(feed.responseLink));
 
@@ -140,7 +140,7 @@ export default () => {
         });
     });
 
-    Promise.all(promises).finally(() => setTimeout(() => update(), millSecToUpdate));
+    Promise.all(promises).finally(() => setTimeout(() => update(), updateInterval));
   };
 
   elements.postsContainer.addEventListener('click', (event) => {

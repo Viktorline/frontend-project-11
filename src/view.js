@@ -1,8 +1,6 @@
 /* eslint-disable no-param-reassign */
 
 import onChange from 'on-change';
-// import i18next from 'i18next';
-// import resources from './locales/index.js';
 
 const renderErrors = (elements, value, i18nextInstance) => {
   elements.feedback.classList.remove('text-success');
